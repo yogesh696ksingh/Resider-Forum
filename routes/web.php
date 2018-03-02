@@ -11,7 +11,5 @@
 |
 */
 
-Route::get('/', function () {
-    return view('layout.master');
-});
+Route::get('/','pageController@checkdb');
 
