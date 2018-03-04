@@ -11,5 +11,6 @@
 |
 */
 
-Route::get('/','pageController@checkdb');
+Route::get('/','PageController@checkdb');
 
+Route::post('/api/searchPost','PageController@searchPost');
