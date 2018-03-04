@@ -14,3 +14,5 @@
 Route::get('/','PageController@checkdb');
 
 Route::post('/api/searchpost','PageController@searchpost');
+
+Route::post('/api/fetchlocation','PageController@fetchlocation');

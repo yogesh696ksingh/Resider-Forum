@@ -16,24 +16,27 @@ class PageController extends Controller
     public function searchpost(Request $request) {
         $user_id = 1; /*session: user_id*/
         $query = DB::table('complaint');
-        $search_mat = $request->all();
+        $page_data = $request->all();
+        $search_mat = $page_data['searchByField'];
+        $offset = $page_data['pageNumber']-1;
+        $limit = $page_data['count'];
         foreach ($search_mat as $key => $value) {
-            if ($value["field_id"] == 'freetext') {
+            if ($value["fieldId"] == 'freetext') {
                 $all_complaints = $query->where('title','like','%'.$value['value'].'%')->orWhere('description','like','%'.$value['value'].'%');
             }
-            if ($value["field_id"] == 'location') {
+            if ($value["fieldId"] == 'location') {
                 $all_complaints = $query->where('location_id','=', $value['value']);
             }
-            if ($value["field_id"] == 'status') {
+            if ($value["fieldId"] == 'status') {
                 $all_complaints = $query->where('status',$value['value']);
             }
-            if ($value["field_id"] == 'user' && $value['value']=='mine') {
+            if ($value["fieldId"] == 'user' && $value['value']=='mine') {
                 $all_complaints = $query->where('user_id',$user_id); /*session: user_id*/
             }
             
         }
       
-        $all_complaints = $query->get();
+        $all_complaints = $query->offset($offset)->limit($limit)->get();
         $plucked_user_id = $all_complaints->pluck('user_id');
         $plucked_user_id = array_unique($plucked_user_id->all());
         $all_user_info = DB::table('users')->select('id','name')->whereIn('id',$plucked_user_id)->get();
@@ -46,9 +49,10 @@ class PageController extends Controller
         foreach ($all_complaints as $key => $value) {
             $all_complaints[$key]['username'] = $user_info[$value['user_id']];
         }
-        $all_complaints_count = DB::table('complaint')->where('user_id',$user_id)->count();
-        echo json_encode($all_complaints);
+        $all_complaints_count = $query->count();
+        $result = [];
+        $result['totalCount'] = $all_complaints_count;
+        $result['data'] = $all_complaints;
+        echo json_encode($result);
     }    
-    
-
 }
