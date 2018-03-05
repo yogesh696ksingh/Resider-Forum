@@ -20,3 +20,5 @@ Route::post('/api/fetchlocation','PageController@fetchlocation');
 Route::post('/api/fetchauthority','PageController@fetchauthority');
 
 Route::get('/api/fetchuser','PageController@fetchuser');
+
+Route::post('/api/reportuser','PageController@reportuser');
