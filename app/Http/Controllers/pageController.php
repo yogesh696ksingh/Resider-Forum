@@ -37,22 +37,85 @@ class PageController extends Controller
         }
       
         $all_complaints = $query->offset($offset)->limit($limit)->get();
+
         $plucked_user_id = $all_complaints->pluck('user_id');
+        $plucked_location_id = $all_complaints->pluck('location_id');
+        
         $plucked_user_id = array_unique($plucked_user_id->all());
+        $plucked_location_id = array_unique($plucked_location_id->all());
+        
         $all_user_info = DB::table('users')->select('id','name')->whereIn('id',$plucked_user_id)->get();
+        $all_location_info = DB::table('location')->select('id','area')->whereIn('id',$plucked_location_id)->get();
+        
         $all_complaints = json_decode(json_encode($all_complaints),true);
+        
         $user_info = $all_user_info->mapWithKeys(function ($item) {
             return [$item->id => $item->name];
         });
+        $location_info = $all_location_info->mapWithKeys(function ($item) {
+            return [$item->id => $item->area];
+        });
+
         $user_info = $user_info->all();
+        $location_info = $location_info->all();
+
         $user_info = json_decode(json_encode($user_info),true);
+        $location_info = json_decode(json_encode($location_info),true);
+
+        
+
         foreach ($all_complaints as $key => $value) {
             $all_complaints[$key]['username'] = $user_info[$value['user_id']];
+            $all_complaints[$key]['area'] = $location_info[$value['location_id']];
+            $all_complaints[$key]['short_desc'] = substr($value['description'], 0 , 100).' ...';
         }
+
         $all_complaints_count = $query->count();
         $result = [];
         $result['totalCount'] = $all_complaints_count;
         $result['data'] = $all_complaints;
         echo json_encode($result);
-    }    
+    }
+
+    public function fetchlocation(Request $request)
+    {
+        $data = $request->all();
+        $user_id = 1; /*session user id*/
+        $query = DB::table('location');
+        foreach ($data as $key => $value) {
+            if ($value["fieldId"] == 'location') {
+                $all_location = $query->where('area','like', '%'.$value['value'].'%');
+            }
+        }
+        $all_location = $query->limit(10)->get();
+        echo json_encode($all_location);
+    }
+    
+    public function fetchauthority(Request $request)
+    {
+        $data = $request->all();
+        $user_id = 1;
+        $query = DB::table('users');
+        foreach ($data as $key => $value) {
+            if ($value["fieldId"] == 'location') {
+                $authority = $query->where('auth_loc','=', $value['value'])->where('user_type','1');
+            }
+        }
+        $authority = $query->first();
+        $recieved = DB::table('complaint')->where('authority_id',$authority->id)->count();
+        $responded = DB::table('complaint')->where([['authority_id',$authority->id],['status','!=',0]])->count();
+        $authority->recieved = $recieved;
+        $authority->responded = $responded;
+        echo json_encode($authority);
+    }
+
+    public function fetchuser()
+    {
+        $user = DB::table('users')->where('id',1)->first();
+        $reported = DB::table('complaint')->where('user_id',$user->id)->count();
+        $completed = DB::table('complaint')->where([['user_id',$user->id],['status',2]])->count();
+        $user->reported = $reported;
+        $user->completed = $completed;
+        echo json_encode($user);
+    }
 }
