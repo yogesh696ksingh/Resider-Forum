@@ -17,9 +17,9 @@ class PageController extends Controller
         $user_id = 1; /*session: user_id*/
         $query = DB::table('complaint');
         $page_data = $request->all();
-        $search_mat = $page_data['searchByField'];
-        $offset = $page_data['pageNumber']-1;
-        $limit = $page_data['count'];
+        $search_mat = $page_data && $page_data['searchByField'] ? $page_data['searchByField'] :  [];
+        $offset = $page_data && $page_data['pageNumber'] ? $page_data['pageNumber']-1 : 0;
+        $limit = $page_data && $page_data['count'] ? $page_data['count'] : 5;
         foreach ($search_mat as $key => $value) {
             if ($value["fieldId"] == 'freetext') {
                 $all_complaints = $query->where('title','like','%'.$value['value'].'%')->orWhere('description','like','%'.$value['value'].'%');
