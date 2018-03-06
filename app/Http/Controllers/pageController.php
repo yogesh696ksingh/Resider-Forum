@@ -124,11 +124,30 @@ class PageController extends Controller
         $data = $request->all();
         $user = DB::table('users')->where('email', $data['email'])->where('password', $data['password'])->first();
         if(!empty($user)) {
-            $reported = DB::table('complaint')->where('user_id',$user->id)->count();
-            $completed = DB::table('complaint')->where([['user_id',$user->id],['status',2]])->count();
-            $user->reported = $reported;
-            $user->completed = $completed;
-            echo json_encode($user);
+            if ($user->user_type == 0) {
+                $reported = DB::table('complaint')->where('user_id',$user->id)->count();
+                $completed = DB::table('complaint')->where([['user_id',$user->id],['status',2]])->count();
+                $user->reported = $reported;
+                $user->completed = $completed;
+                $con_auth = DB::table('users')->where('auth_loc',$user->auth_loc)->where('user_type',1)->get();
+                if(!empty($con_auth)) {
+                    $con_auth->recieved = DB::table('complaint')->where('authority_id',$con_auth->id)->count();
+                    $con_auth->responded = DB::table('complaint')->where([['authority_id',$con_auth->id],['status','!=',0]])->count();
+                    $user->authority = $con_auth;
+                }
+                echo json_encode($user);
+            }
+            elseif ($user->user_type == 1) {
+                $recieved = DB::table('complaint')->where('authority_id',$user->id)->count();
+                $responded = DB::table('complaint')->where([['authority_id',$user->id],['status',2]])->count();
+                $user->recieved = $recieved;
+                $user->responded = $responded;
+                $user_total = DB::table('users')->where('user_type',0)->count();
+                $authority_total = DB::table('users')->where('user_type',1)->count();
+                $user->user_total = $user_total;
+                $user->authority_total = $authority_total;
+                echo json_encode($user);   
+            }
         }
         else {
             echo '{}';
