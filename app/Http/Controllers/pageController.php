@@ -168,4 +168,11 @@ class PageController extends Controller
             ['user_id' => $user_id, 'authority_id' => $aut_id, 'title' => $data["problemTitle"], 'location_id' => $loc_id, 'description' => $data["problemDescription"]]
         );
     }
+
+    public function changestatus(Request $request)
+    {
+        $data = $request->all();
+        DB::table('complaint')->where('id', $data["id"])->update(['status' => $data["status"]]);
+        echo $data["status"];
+    }
 }
