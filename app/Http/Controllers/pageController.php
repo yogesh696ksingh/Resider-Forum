@@ -42,7 +42,7 @@ class PageController extends Controller
             
         }
       
-        $all_complaints = $query->offset($offset)->limit($limit)->get();
+        $all_complaints = $query->offset($offset)->limit($limit)->orderBy('id','desc')->get();
 
         $plucked_user_id = $all_complaints->pluck('user_id');
         $plucked_location_id = $all_complaints->pluck('location_id');
@@ -109,7 +109,7 @@ class PageController extends Controller
         }
         $authority = $query->first();
         $recieved = DB::table('complaint')->where('authority_id',$authority->id)->count();
-        $responded = DB::table('complaint')->where([['authority_id',$authority->id],['status','!=',0]])->count();
+        $responded = DB::table('complaint')->where([['authority_id',$authority->id],['status','>',1]])->count();
         $authority->recieved = $recieved;
         $authority->responded = $responded;
         echo json_encode($authority);
@@ -138,7 +138,7 @@ class PageController extends Controller
                 $con_auth = DB::table('users')->where('auth_loc',$user->auth_loc)->where('user_type',1)->first();
                 if(!empty($con_auth)) {
                     $con_auth->recieved = DB::table('complaint')->where('authority_id',$con_auth->id)->count();
-                    $con_auth->responded = DB::table('complaint')->where([['authority_id',$con_auth->id],['status','!=',0]])->count();
+                    $con_auth->responded = DB::table('complaint')->where([['authority_id',$con_auth->id],['status','>',1]])->count();
                     $user->authority = $con_auth;
                 }
                 echo json_encode($user);
@@ -189,5 +189,11 @@ class PageController extends Controller
     public function reset()
     {
         DB::table('complaint')->where('id','>','0')->update(['status'=> 0]);
+    }
+
+    public function alllocation()
+    {
+        $all_location = DB::table('location')->select('*')->get();
+        echo json_encode($all_location);
     }
 }

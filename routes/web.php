@@ -28,3 +28,5 @@ Route::post('/api/reportuser','PageController@reportuser');
 Route::post('/api/changestatus','PageController@changestatus');
 
 Route::get('/reset/reset','PageController@reset');
+
+Route::get('/api/alllocation','PageController@alllocation');
