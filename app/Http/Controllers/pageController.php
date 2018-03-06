@@ -146,7 +146,7 @@ class PageController extends Controller
                 $authority_total = DB::table('users')->where('user_type',1)->count();
                 $user->user_total = $user_total;
                 $user->authority_total = $authority_total;
-                DB::table('complaint')->where('authority_id', $user->id)->update(['status' => 1]);
+                DB::table('complaint')->where('authority_id', $user->id)->where('status',0)->update(['status' => 1]);
                 echo json_encode($user);   
             }
         }
@@ -173,7 +173,15 @@ class PageController extends Controller
     public function changestatus(Request $request)
     {
         $data = $request->all();
-        DB::table('complaint')->where('id', $data["id"])->update(['status' => $data["status"]]);
-        echo $data["status"];
+        $status = $data["status"];
+        $id = $data["id"];
+        // echo $status;
+        // echo json_encode($data);
+        DB::table('complaint')->where('id', $id)->update(['status' => $status]);
+        echo $status;
+    }
+    public function reset()
+    {
+        DB::table('complaint')->where('id','>','0')->update(['status'=> 0]);
     }
 }
