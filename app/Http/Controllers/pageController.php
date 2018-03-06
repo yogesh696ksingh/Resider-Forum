@@ -146,6 +146,7 @@ class PageController extends Controller
                 $authority_total = DB::table('users')->where('user_type',1)->count();
                 $user->user_total = $user_total;
                 $user->authority_total = $authority_total;
+                DB::table('complaint')->where('id', $user->id)->update(['status' => 1]);
                 echo json_encode($user);   
             }
         }
