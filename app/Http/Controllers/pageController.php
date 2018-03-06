@@ -135,7 +135,7 @@ class PageController extends Controller
                     $con_auth->responded = DB::table('complaint')->where([['authority_id',$con_auth->id],['status','!=',0]])->count();
                     $user->authority = $con_auth;
                 }
-                echo json_encode($con_auth);
+                echo json_encode($user);
             }
             elseif ($user->user_type == 1) {
                 $recieved = DB::table('complaint')->where('authority_id',$user->id)->count();
