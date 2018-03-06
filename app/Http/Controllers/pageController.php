@@ -14,9 +14,10 @@ class PageController extends Controller
     }
 
     public function searchpost(Request $request) {
-        $user_id = 1; /*session: user_id*/
         $query = DB::table('complaint');
         $page_data = $request->all();
+        $user_id = $page_data['user_id'];
+        $user_type = $page_data['user_type']; 
         $search_mat = $page_data && $page_data['searchByField'] ? $page_data['searchByField'] :  [];
         $offset = $page_data && $page_data['pageNumber'] ? $page_data['pageNumber']-1 : 0;
         $limit = $page_data && $page_data['count'] ? $page_data['count'] : 5;
@@ -31,7 +32,12 @@ class PageController extends Controller
                 $all_complaints = $query->where('status',$value['value']);
             }
             if ($value["fieldId"] == 'user' && $value['value']=='mine') {
-                $all_complaints = $query->where('user_id',$user_id); /*session: user_id*/
+                if($user_type == 0) {
+                    $all_complaints = $query->where('user_id',$user_id); /*session: user_id*/
+                }
+                else {
+                    $all_complaints = $query->where('authority_id',$user_id);
+                }
             }
             
         }
