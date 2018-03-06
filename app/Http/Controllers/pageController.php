@@ -129,13 +129,13 @@ class PageController extends Controller
                 $completed = DB::table('complaint')->where([['user_id',$user->id],['status',2]])->count();
                 $user->reported = $reported;
                 $user->completed = $completed;
-                $con_auth = DB::table('users')->where('auth_loc',$user->auth_loc)->where('user_type',1)->get();
+                $con_auth = DB::table('users')->where('auth_loc',$user->auth_loc)->where('user_type',1)->first();
                 if(!empty($con_auth)) {
                     $con_auth->recieved = DB::table('complaint')->where('authority_id',$con_auth->id)->count();
                     $con_auth->responded = DB::table('complaint')->where([['authority_id',$con_auth->id],['status','!=',0]])->count();
                     $user->authority = $con_auth;
                 }
-                echo json_encode($user);
+                echo json_encode($con_auth);
             }
             elseif ($user->user_type == 1) {
                 $recieved = DB::table('complaint')->where('authority_id',$user->id)->count();
