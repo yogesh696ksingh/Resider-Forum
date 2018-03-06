@@ -21,4 +21,6 @@ Route::post('/api/fetchauthority','PageController@fetchauthority');
 
 Route::get('/api/fetchuser','PageController@fetchuser');
 
+Route::post('/api/login','PageController@login');
+
 Route::post('/api/reportuser','PageController@reportuser');

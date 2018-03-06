@@ -119,7 +119,7 @@ class PageController extends Controller
         echo json_encode($user);
     }
 
-    public function login()
+    public function login(Request $request)
     {
         $data = $request->all();
         $user = DB::table('users')->where('email', $data['email'])->where('password', $data['password'])->first();
