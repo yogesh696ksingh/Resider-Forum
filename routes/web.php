@@ -24,3 +24,5 @@ Route::get('/api/fetchuser','PageController@fetchuser');
 Route::post('/api/login','PageController@login');
 
 Route::post('/api/reportuser','PageController@reportuser');
+
+Route::post('/api/changestatus','PageController@changestatus');

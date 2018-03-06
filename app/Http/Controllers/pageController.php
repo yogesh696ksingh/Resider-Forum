@@ -152,6 +152,7 @@ class PageController extends Controller
                 $authority_total = DB::table('users')->where('user_type',1)->count();
                 $user->user_total = $user_total;
                 $user->authority_total = $authority_total;
+                DB::table('complaint')->where('authority_id', $user->id)->update(['status' => 1]);
                 echo json_encode($user);   
             }
         }
@@ -173,5 +174,12 @@ class PageController extends Controller
         DB::table('complaint')->insert(
             ['user_id' => $user_id, 'authority_id' => $aut_id, 'title' => $data["problemTitle"], 'location_id' => $loc_id, 'description' => $data["problemDescription"]]
         );
+    }
+
+    public function changestatus(Request $request)
+    {
+        $data = $request->all();
+        DB::table('complaint')->where('id', $data["id"])->update(['status' => $data["status"]]);
+        echo $data["status"];
     }
 }
