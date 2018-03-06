@@ -119,6 +119,23 @@ class PageController extends Controller
         echo json_encode($user);
     }
 
+    public function login()
+    {
+        $data = $request->all();
+        $user = DB::table('users')->where('email', $data['email'])->where('password', $data['password'])->first();
+        if(!empty($user)) {
+            $reported = DB::table('complaint')->where('user_id',$user->id)->count();
+            $completed = DB::table('complaint')->where([['user_id',$user->id],['status',2]])->count();
+            $user->reported = $reported;
+            $user->completed = $completed;
+            echo json_encode($user);
+        }
+        else {
+            echo '{}';
+        }
+        
+    }
+
     public function reportuser(Request $request)
     {
         $user_id = 1;
