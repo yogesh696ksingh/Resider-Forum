@@ -167,7 +167,7 @@ class PageController extends Controller
         $data = $request->all();
         $aut_id = DB::table('users')->select('id')->where("auth_loc", $data["location_id"])->where("user_type",1)->first();
         DB::table('complaint')->insert(
-            ['user_id' => $data["user_id"], 'authority_id' => $aut_id, 'title' => $data["title"], 'location_id' => $loc_id, 'description' => $data["description"]]
+            ['user_id' => $data["user_id"], 'authority_id' => $aut_id, 'title' => $data["title"], 'location_id' => $data["location_id"], 'description' => $data["description"]]
         );
     }
 
