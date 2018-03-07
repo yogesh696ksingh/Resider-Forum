@@ -164,15 +164,10 @@ class PageController extends Controller
 
     public function reportuser(Request $request)
     {
-        $user_id = 1;
         $data = $request->all();
-        $pincode = 410210;
-        $city = "Navi Mumbai";
-        $state = "Maharashtra";
-        $loc_id = 1;
-        $aut_id = DB::table('users')->select('id')->where("auth_loc", $loc_id)->first();
+        $aut_id = DB::table('users')->select('id')->where("auth_loc", $data["location_id"])->where("user_type",1)->first();
         DB::table('complaint')->insert(
-            ['user_id' => $user_id, 'authority_id' => $aut_id, 'title' => $data["problemTitle"], 'location_id' => $loc_id, 'description' => $data["problemDescription"]]
+            ['user_id' => $data["user_id"], 'authority_id' => $aut_id, 'title' => $data["title"], 'location_id' => $loc_id, 'description' => $data["description"]]
         );
     }
 
