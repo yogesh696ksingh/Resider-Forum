@@ -205,7 +205,7 @@ class PageController extends Controller
             \Storage::disk('local')->put($filename.'.'.$extension, \File::get($files));
             $data['doc_photo'] = $filename.'.'.$extension;
         }
-        DB::table('complaint')->insert(
+        DB::table('users')->insert(
             $data
         );
     }
