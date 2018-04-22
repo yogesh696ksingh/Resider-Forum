@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Input;
 
 class PageController extends Controller
 {
@@ -19,8 +20,9 @@ class PageController extends Controller
         $user_id = $page_data['user_id'];
         $user_type = $page_data['user_type']; 
         $search_mat = $page_data && $page_data['searchByField'] ? $page_data['searchByField'] :  [];
-        $offset = $page_data && $page_data['pageNumber'] ? $page_data['pageNumber']-1 : 0;
-        $limit = $page_data && $page_data['count'] ? $page_data['count'] : 5;
+        $limit = (isset($page_data) && $page_data['count']) ? $page_data['count'] : 5;
+        $offset = (isset($page_data) && $page_data['pageNumber']) ? $page_data['pageNumber']-1 : 0;
+        $offset = $offset * $limit;
         foreach ($search_mat as $key => $value) {
             if ($value["fieldId"] == 'freetext') {
                 $all_complaints = $query->where('title','like','%'.$value['value'].'%')->orWhere('description','like','%'.$value['value'].'%');
@@ -41,7 +43,8 @@ class PageController extends Controller
             }
             
         }
-      
+        $all_complaints = $query->where('isArchived','<>' , 1);
+        $all_complaints_count = isset($all_complaints) ? $all_complaints->count() : $query->count();
         $all_complaints = $query->offset($offset)->limit($limit)->orderBy('id','desc')->get();
 
         $plucked_user_id = $all_complaints->pluck('user_id');
@@ -68,15 +71,17 @@ class PageController extends Controller
         $user_info = json_decode(json_encode($user_info),true);
         $location_info = json_decode(json_encode($location_info),true);
 
-        
-
         foreach ($all_complaints as $key => $value) {
             $all_complaints[$key]['username'] = $user_info[$value['user_id']];
             $all_complaints[$key]['area'] = $location_info[$value['location_id']];
             $all_complaints[$key]['short_desc'] = substr($value['description'], 0 , 100).' ...';
         }
 
-        $all_complaints_count = $query->count();
+        //$all_complaints_count = count($query->get());
+        // echo '<pre>';
+        // echo $query->count();
+        // echo '</pre>';
+        // dd(DB::getQueryLog());
         $result = [];
         $result['totalCount'] = $all_complaints_count;
         $result['data'] = $all_complaints;
@@ -130,7 +135,7 @@ class PageController extends Controller
         $data = $request->all();
         $user = DB::table('users')->where('email', $data['email'])->where('password', $data['password'])->first();
         if(!empty($user)) {
-            if ($user->user_type == 0) {
+            if ($user->user_type == 0 || $user->user_type == 2) {
                 $reported = DB::table('complaint')->where('user_id',$user->id)->count();
                 $completed = DB::table('complaint')->where([['user_id',$user->id],['status',2]])->count();
                 $user->reported = $reported;
@@ -166,8 +171,17 @@ class PageController extends Controller
     {
         $data = $request->all();
         $aut_id = DB::table('users')->select('id')->where("auth_loc", $data["location_id"])->where("user_type",1)->first();
+        $pic = ''; //default
+        if (Input::hasFile('file'))
+        {
+            $files = Input::file('file');
+            $extension = $files->getClientOriginalExtension();
+            $filename = time();
+            \Storage::disk('local')->put($filename.'.'.$extension, \File::get($files));
+            $pic = $filename.'.'.$extension;
+        }
         DB::table('complaint')->insert(
-            ['user_id' => $data["user_id"], 'authority_id' => $aut_id, 'title' => $data["title"], 'location_id' => $data["location_id"], 'description' => $data["description"]]
+            ['user_id' => $data["user_id"], 'authority_id' => $aut_id->id, 'title' => $data["title"], 'location_id' => $data["location_id"], 'description' => $data["description"], 'photo' => $pic]
         );
     }
 
@@ -181,6 +195,15 @@ class PageController extends Controller
         DB::table('complaint')->where('id', $id)->update(['status' => $status]);
         echo $status;
     }
+
+    public function delete(Request $request)
+    {
+        $data = $request->all();
+        $id = $data["id"];
+        DB::table('complaint')->where('id', $id)->update(['isArchived' => 1]);
+        echo 200;
+    }
+
     public function reset()
     {
         DB::table('complaint')->where('id','>','0')->update(['status'=> 0]);

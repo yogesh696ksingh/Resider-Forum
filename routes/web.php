@@ -30,3 +30,22 @@ Route::post('/api/changestatus','PageController@changestatus');
 Route::get('/reset/reset','PageController@reset');
 
 Route::get('/api/alllocation','PageController@alllocation');
+
+Route::post('/api/delete','PageController@delete');
+
+Route::get('/api/storage/{filename}', function ($filename)
+{
+    $path = storage_path('app/' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+});
