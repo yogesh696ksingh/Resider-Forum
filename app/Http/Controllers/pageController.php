@@ -185,6 +185,31 @@ class PageController extends Controller
         );
     }
 
+    public function register(Request $request)
+    {
+        $data = $request->all();
+        
+        if (Input::hasFile('photo'))
+        {
+            $files = Input::file('photo');
+            $extension = $files->getClientOriginalExtension();
+            $filename = time();
+            \Storage::disk('local')->put($filename.'.'.$extension, \File::get($files));
+            $data['photo'] = $filename.'.'.$extension;
+        }
+        if (Input::hasFile('doc_photo'))
+        {
+            $files = Input::file('doc_photo');
+            $extension = $files->getClientOriginalExtension();
+            $filename = time();
+            \Storage::disk('local')->put($filename.'.'.$extension, \File::get($files));
+            $data['doc_photo'] = $filename.'.'.$extension;
+        }
+        DB::table('complaint')->insert(
+            $data
+        );
+    }
+
     public function changestatus(Request $request)
     {
         $data = $request->all();

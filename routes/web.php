@@ -25,6 +25,8 @@ Route::post('/api/login','PageController@login');
 
 Route::post('/api/reportuser','PageController@reportuser');
 
+Route::post('/api/register','PageController@register');
+
 Route::post('/api/changestatus','PageController@changestatus');
 
 Route::get('/reset/reset','PageController@reset');
